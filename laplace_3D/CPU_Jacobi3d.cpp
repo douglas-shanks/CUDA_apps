@@ -1,9 +1,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
-void Gold_laplace3d(int NX, int NY, int NZ, float* u1, float* u2) 
+void CPU_Jacobi3d(int NX, int NY, int NZ, double* u1, double* u2, double* b) 
 {
   int   i, j, k, ind;
-  float sixth=1.0f/6.0f;  // predefining this improves performance more than 10%
+  double sixth=1.0f/6.0f;  // predefining this improves performance more than 10%
 
   for (k=0; k<NZ; k++) {
     for (j=0; j<NY; j++) {
@@ -16,7 +16,7 @@ void Gold_laplace3d(int NX, int NY, int NZ, float* u1, float* u2)
         else {
           u2[ind] = ( u1[ind-1    ] + u1[ind+1    ]
                     + u1[ind-NX   ] + u1[ind+NX   ]
-                    + u1[ind-NX*NY] + u1[ind+NX*NY] ) * sixth;
+                    + u1[ind-NX*NY] + u1[ind+NX*NY] +b[ind]) * sixth;
         }
       }
     }

@@ -2,7 +2,7 @@
 #include <stdio.h>      /* printf */
 #include <iostream>
 ////////////////////////////////////////////////////////////////////////////////
-double Gold_norm2d(int NX, int NY, double* u1, double* u2) 
+double CPU_norm2d(int NX, int NY, double* u1, double* u2) 
 {
   int   i, j, ind;
   double norm;

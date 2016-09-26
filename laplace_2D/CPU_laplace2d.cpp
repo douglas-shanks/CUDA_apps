@@ -1,6 +1,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
-void Gold_laplace2d(int NX, int NY, double* u1, double* u2, double* b) 
+void CPU_laplace2d(int NX, int NY, double* u1, double* u2, double* b) 
 {
   int   i, j, ind;
   double quart=1.0/4.0;  // predefining this improves performance more than 10%

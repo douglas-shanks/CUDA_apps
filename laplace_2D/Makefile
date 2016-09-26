@@ -8,8 +8,8 @@
 
 all: 		laplace2d 
 
-laplace2d:	laplace2d.cpp laplace2d_gold.cpp norm2d_gold.cpp Makefile
-		g++ laplace2d.cpp laplace2d_gold.cpp norm2d_gold.cpp -o laplace2d \
+laplace2d:	laplace2d.cpp CPU_laplace2d.cpp CPU_norm2d.cpp Makefile
+		g++ laplace2d.cpp CPU_laplace2d.cpp CPU_norm2d.cpp -o laplace2d \
 #		$(INC) $(NVCCFLAGS) $(LIB)
 
 clean:

@@ -8,8 +8,8 @@
 
 all: 		laplace3d 
 
-laplace3d:	laplace3d.cpp CPU_Jacobi3d.cpp CPU_norm3d.cpp Makefile
-		g++ laplace3d.cpp CPU_Jacobi3d.cpp CPU_norm3d.cpp -o laplace3d \
+laplace3d:	laplace3d.cpp CPU_Jacobi3D.cpp CPU_norm3d.cpp Makefile
+		g++ laplace3d.cpp CPU_Jacobi3D.cpp CPU_norm3d.cpp -o laplace3d \
 #		$(INC) $(NVCCFLAGS) $(LIB)
 
 clean:
