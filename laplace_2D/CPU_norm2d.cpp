@@ -13,6 +13,6 @@ double CPU_norm2d(int NX, int NY, double* u1, double* u2)
         norm += (u1[ind]-u2[ind])*(u1[ind]-u2[ind]);
       }
     }
-        norm = sqrt(norm/ (double)(NX*NY));
+        norm = sqrt(norm / (double)(NX*NY));
         return norm;
 }

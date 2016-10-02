@@ -8,14 +8,16 @@
 #include <string.h>
 #include <math.h>
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <ctime>
 
+#define PI 4.0*atan(1.0)
 ////////////////////////////////////////////////////////////////////////
 // declare Gold routines
 ////////////////////////////////////////////////////////////////////////
 
-void CPU_laplace2d(int NX, int NY, double* h_u1, double* h_u2, double* h_b);
+void CPU_jacobi_laplace2d(int NX, int NY, double* h_u1, double* h_u2, double* h_b, double* alpha);
 
 double CPU_norm2d(int NX, int NY, double* h_u1, double* h_u2);
 
@@ -32,9 +34,9 @@ int main(int argc, const char **argv){
 
   // 'h_' prefix - CPU (host) memory space
 
-  int    NX=125, NY=125, max_iters=10000, 
+  int    NX=40, NY=40, max_iters=1000, 
          bx, by, i, j, ind, iters=0;
-  double  *h_u1, *h_u2, *h_u3, *h_b, *h_foo, err, norm, tol = 1e-2;
+  double  *h_u1, *h_u2, *h_u3, *h_b, *h_foo, *alpha, err, norm, tol = 1e-4, rx;
 
   printf("\nGrid dimensions: %d x %d\n", NX, NY);
 
@@ -44,45 +46,53 @@ int main(int argc, const char **argv){
   h_u2 = (double *)malloc(sizeof(double)*NX*NY);
   h_u3 = (double *)malloc(sizeof(double)*NX*NY);
   h_b = (double *)malloc(sizeof(double)*NX*NY);
+  alpha = (double *)malloc(sizeof(double)*NX*NY);
 
-  // initialise u1. Initial guess for iteration
+  // initialise u1. Initial guess for iteration, say u=1 which result in a bowl
 
     for (j=0; j<NY; j++) {
       for (i=0; i<NX; i++) {
         ind = i + j*NX;
-
         if (i==0 || i==NX-1 || j==0 || j==NY-1)
-          h_u1[ind] = 1.0;           // Dirichlet b.c.'s
+          h_u1[ind] = 0.0;           // Dirichlet b.c.'s
         else
-          h_u1[ind] = 0.0;
+          h_u1[ind] = 0.01;
       }
     }
-    
-  // initialise rhs b. Start with b = 0 and solve the error equation
+   rx = 1 / double(NX - 1); 
+ printf("1 / NX = %.16f \n",rx);   
+ printf("1 / NX^2 = %.16f \n",rx*rx);  
+  // initialise rhs b. Start with b = 0 
 
     for (j=0; j<NY; j++) {
       for (i=0; i<NX; i++) {
         ind = i + j*NX;
-
         if (i==0 || i==NX-1 || j==0 || j==NY-1)
           h_b[ind] = 0.0;           // Dirichlet b.c.'s
         else
-          h_b[ind] = 0.0;
+          h_b[ind] = 1.0;//sin(PI*i/NX)*sin(PI*j/NY);
       }
     }
+  // initialise alpha in D(alpha D u) = 0 
 
+    for (j=0; j<NY; j++) {
+      for (i=0; i<NX; i++) {
+        ind = i + j*NX;
+          alpha[ind] = 1.0;
+      }
+    }
   // Jacobi iteraton
 
   start = std::clock();
   norm = 0.0;
   for (int i = 1; i <= max_iters; ++i) {
   
-    CPU_laplace2d(NX, NY, h_u1, h_u3, h_b);
+    CPU_jacobi_laplace2d(NX, NY, h_u1, h_u3, h_b, alpha);
     
     // Add a declaration to exit the loop if the tolerance is reached.
     norm = CPU_norm2d(NX, NY, h_u1, h_u3);
     // what is the norm
-    printf("norm = %.16f \n",norm);
+   // printf("norm = %.16f \n",norm);
     
     iters = iters + 1; //iteration counter
     if (norm <= tol) break;
@@ -93,21 +103,6 @@ int main(int argc, const char **argv){
   duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
   printf("\n%d iterations of Jacobi: %.8f (s) \n \n", iters, duration);
   printf("2-norm of residual= %.16f \n",norm);
-  
-  // print out corner of array
-
-  /*
-  for (k=0; k<3; k++) {
-    for (j=0; j<8; j++) {
-      for (i=0; i<8; i++) {
-        ind = i + j*NX + k*NX*NY;
-        printf(" %5.2f ", h_u1[ind]);
-      }
-      printf("\n");
-    }
-    printf("\n");
-  }
-  */
 
   // error check
 
@@ -121,6 +116,16 @@ int main(int argc, const char **argv){
     }
 
   printf("rms error = %.16f \n",sqrt(err/ (double)(NX*NY)));
+
+// print the solution to a text file
+std::ofstream out("laplace.txt");
+for (j=0; j<NY; j++) {
+	for (i=0; i<NX; i++) {
+        ind = i + j*NX;
+        out << h_u1[ind]<< '\n';
+    }
+}
+out.close();
 
  // Release CPU memory
 
