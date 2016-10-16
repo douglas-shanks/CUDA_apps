@@ -34,7 +34,7 @@ int main(int argc, const char **argv){
 
   // 'h_' prefix - CPU (host) memory space
 
-  int    NX=40, NY=40, max_iters=1000, 
+  int    NX=40, NY=40, max_iters=5000, 
          bx, by, i, j, ind, iters=0;
   double  *h_u1, *h_u2, *h_u3, *h_b, *h_foo, *alpha, err, norm, tol = 1e-4, rx;
 
@@ -46,6 +46,7 @@ int main(int argc, const char **argv){
   h_u2 = (double *)malloc(sizeof(double)*NX*NY);
   h_u3 = (double *)malloc(sizeof(double)*NX*NY);
   h_b = (double *)malloc(sizeof(double)*NX*NY);
+  h_foo = (double *)malloc(sizeof(double)*NX*NY);
   alpha = (double *)malloc(sizeof(double)*NX*NY);
 
   // initialise u1. Initial guess for iteration, say u=1 which result in a bowl
@@ -59,9 +60,7 @@ int main(int argc, const char **argv){
           h_u1[ind] = 0.01;
       }
     }
-   rx = 1 / double(NX - 1); 
- printf("1 / NX = %.16f \n",rx);   
- printf("1 / NX^2 = %.16f \n",rx*rx);  
+
   // initialise rhs b. Start with b = 0 
 
     for (j=0; j<NY; j++) {
@@ -77,10 +76,33 @@ int main(int argc, const char **argv){
 
     for (j=0; j<NY; j++) {
       for (i=0; i<NX; i++) {
-        ind = i + j*NX;
+          ind = i + j*NX;
+        
+        //if( (round(0.5*NX)<=i && i<=round(0.75*NX)) && (0.0<=j && j<=round(0.25*NY)))
+   		//	alpha[ind]=10.0;
+		//else if((round(0.25*NX)<=i && i<=round(0.5*NX))&&(round(0.25*NY)<=j && j<=round(0.5*NY)))
+   		//	alpha[ind]=10.0;
+		//else if((round(0.5*NX)<=i && i<=round(0.75*NX))&&(round(0.5*NY)<=j && j<=round(0.75*NY)))
+   		//	alpha[ind]=10.0;
+		//else if((round(0.25*NX)<=i && i<=round(0.5*NX))&&(round(0.75*NY)<=j && j<=round(1.0*NY)))
+   		//	alpha[ind]=10.0;
+		//else
+   			//alpha[ind] = 0.001;
+        
           alpha[ind] = 1.0;
       }
     }
+    
+ // print the solution to a text file
+std::ofstream out("alpha.txt");
+for (j=0; j<NY; j++) {
+	for (i=0; i<NX; i++) {
+        ind = i + j*NX;
+        out << alpha[ind]<< '\n';
+    }
+}
+out.close();   
+    
   // Jacobi iteraton
 
   start = std::clock();
@@ -90,10 +112,8 @@ int main(int argc, const char **argv){
     CPU_jacobi_laplace2d(NX, NY, h_u1, h_u3, h_b, alpha);
     
     // Add a declaration to exit the loop if the tolerance is reached.
-    norm = CPU_norm2d(NX, NY, h_u1, h_u3);
-    // what is the norm
-   // printf("norm = %.16f \n",norm);
-    
+    norm = CPU_norm2d(NX, NY, h_u1, h_u3);  
+     
     iters = iters + 1; //iteration counter
     if (norm <= tol) break;
     
@@ -118,11 +138,11 @@ int main(int argc, const char **argv){
   printf("rms error = %.16f \n",sqrt(err/ (double)(NX*NY)));
 
 // print the solution to a text file
-std::ofstream out("laplace.txt");
+std::ofstream outlap("laplace.txt");
 for (j=0; j<NY; j++) {
 	for (i=0; i<NX; i++) {
         ind = i + j*NX;
-        out << h_u1[ind]<< '\n';
+        outlap << h_u1[ind]<< '\n';
     }
 }
 out.close();

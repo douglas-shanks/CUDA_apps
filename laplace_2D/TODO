@@ -1,0 +1,7 @@
+10/10/16 22:34
+
+Have finished adding the diffusion coefficient into both
+of the MATLAB programs (including the one with the same indexing as thte C++
+version. Will add in this to the C++ version (done).
+Still have to write a version of CG (don't bother? I'm just learning to use CUDA). Then after this do it all for 3D.
+
